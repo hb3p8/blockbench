@@ -52,6 +52,7 @@
 	"mode.edit": "Edit",
 	"mode.paint": "Paint",
 	"mode.display": "Display",
+	"mode.render": "Render",
 	"mode.animate": "Animate",
 
 	"mode.start.new": "New",

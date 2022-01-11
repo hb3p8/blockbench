@@ -140,6 +140,20 @@ BARS.defineActions(function() {
 		},
 	})
 	new Mode({
+		id: 'render',
+		selectCubes: false,
+		default_tool: 'move_tool',
+		category: 'navigate',
+		keybind: new Keybind({key: 51}),
+		condition: () => Format.display_mode,
+		onSelect: () => {
+			enterDisplaySettings()
+		},
+		onUnselect: () => {
+			exitDisplaySettings()
+		},
+	})
+	new Mode({
 		id: 'animate',
 		default_tool: 'move_tool',
 		category: 'navigate',

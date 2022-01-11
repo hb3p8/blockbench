@@ -1427,32 +1427,75 @@ enterDisplaySettings = function() {		//Enterung Display Setting Mode, changes th
 	selected.empty()
 	updateSelection()
 
-	display_base.add(scene)
-	if (!display_preview) {
-		display_preview = new Preview({id: 'display'})
-	}
-	if (quad_previews.enabled) {
-		quad_previews.enabled_before = true
-	}
-	display_preview.fullscreen()
-	display_preview.loadAnglePreset(display_angle_preset)
-	display_preview.camPers.setFocalLength(45)
+	$('#preview').empty()
+
+	var wrapper = $('<iframe id="lt-viewer" frameborder="0" allowfullscreen="" src="app.html?open=empty" width="100%" height="100%"></iframe>');
+	$('#preview').append(wrapper);
+
+	setTimeout(_ => {
+
+		let scope = this;
+		let exporter = new THREE.GLTFExporter();
+		let animations = [];
+		let gl_scene = new THREE.Scene();
+		gl_scene.name = 'blockbench_export'
+
+		scene.children.forEachReverse(object => {
+			if (object.isGroup || object.isElement) {
+				gl_scene.add(object.clone());
+			}
+		});
+
+		exporter.parse(gl_scene, (json) => {
+			let content = JSON.stringify(json);
+
+			let frame = document.getElementById("lt-viewer");
+			let LT = frame.contentWindow.ModuleLT;
+
+			let enc = new TextEncoder();
+			let array = enc.encode(content);
+			let numBytes = array.length;
+			let ptr = LT._malloc(numBytes);
+			let heapSubarray = LT.HEAP8.subarray(ptr, ptr + numBytes);
+			heapSubarray.set(array);
+
+			LT.OpenFileAsync(LT.dropFileId, "file.gltf", ptr, array.length);
+		}, {
+			animations,
+			onlyVisible: false,
+			trs: true,
+			truncateDrawRange: false,
+			forcePowerOfTwoTextures: true,
+			exportFaceColors: false
+		});
+	}, 5000);
+
+	// display_base.add(scene)
+	// if (!display_preview) {
+	// 	display_preview = new Preview({id: 'display'})
+	// }
+	// if (quad_previews.enabled) {
+	// 	quad_previews.enabled_before = true
+	// }
+	// display_preview.fullscreen()
+	// display_preview.loadAnglePreset(display_angle_preset)
+	// display_preview.camPers.setFocalLength(45)
 	
-	$('body').addClass('display_mode')
-	$('#display_bar input#thirdperson_righthand').prop("checked", true)
+	// $('body').addClass('display_mode')
+	// $('#display_bar input#thirdperson_righthand').prop("checked", true)
 
 
-	buildGrid()
-	updateShading()
-	DisplayMode.loadThirdRight()
+	// buildGrid()
+	// updateShading()
+	// DisplayMode.loadThirdRight()
 
-	display_area.updateMatrixWorld()
-	display_base.updateMatrixWorld()
-	Transformer.center()
-	if (outlines.children.length) {
-		outlines.children.length = 0
-		Canvas.updateAllPositions()
-	}
+	// display_area.updateMatrixWorld()
+	// display_base.updateMatrixWorld()
+	// Transformer.center()
+	// if (outlines.children.length) {
+	// 	outlines.children.length = 0
+	// 	Canvas.updateAllPositions()
+	// }
 }
 exitDisplaySettings = function() {		//Enterung Display Setting Mode, changes the scene etc
 	resetDisplayBase()
